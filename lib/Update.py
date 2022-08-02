@@ -127,9 +127,7 @@ class Update(object):
             s3 = session.resource('s3')
             self.bucket = s3.Bucket(self.plan_license)
 
-            for file in self.bucket.objects.all():
-                files.append(file.key)
-
+            files.extend(file.key for file in self.bucket.objects.all())
         except Exception as e:
 
             if "Could not connect" in str(e):
@@ -138,22 +136,22 @@ class Update(object):
                 code_error = e.response["Error"]["Code"]
 
                 if code_error == "403":
-                    reason = "Access suspended to: %s" % self.plan_license
+                    reason = f"Access suspended to: {self.plan_license}"
 
-                if code_error == "AccessDenied":
-                    reason = "Access denied to plan: %s" % self.plan_license
+                elif code_error == "AccessDenied":
+                    reason = f"Access denied to plan: {self.plan_license}"
 
-                if code_error == "InvalidAccessKeyId":
-                    reason = "Error on access key: %s" % self.access_key
-
-                if code_error == "SignatureDoesNotMatch":
-                    reason = "Error on secret key: %s" % self.secret_key
-
-                if code_error == "AuthorizationHeaderMalformed":
+                elif code_error == "AuthorizationHeaderMalformed":
                     reason = "Empty access key"
 
-                if code_error == "NoSuchBucket":
+                elif code_error == "InvalidAccessKeyId":
+                    reason = f"Error on access key: {self.access_key}"
+
+                elif code_error == "NoSuchBucket":
                     reason = "Licensed plan not specified."
+
+                elif code_error == "SignatureDoesNotMatch":
+                    reason = f"Error on secret key: {self.secret_key}"
 
             response = utility.serialize_error(False, reason, str(e))
             sys.exit(response)
@@ -168,8 +166,5 @@ class Update(object):
             for file in os.listdir(self.path):
                 if "tgz" in file or "update" in file:
                     os.remove(os.path.join(self.path, file))
-                else:
-                    pass
-
         except Exception as e:
             utility.serialize_error(False, "already cleaned", str(e))

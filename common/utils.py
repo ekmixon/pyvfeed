@@ -41,12 +41,7 @@ def check_file(file):
     if not (os.path.isfile(file) or os.access(file, os.R_OK)):
         reason = "permission denied or object not found"
         return False, reason
-    if os.stat(file).st_size == 0:
-        reason = "empty_size"
-        return False, reason
-    else:
-        reason = "found"
-        return True, reason
+    return (False, "empty_size") if os.stat(file).st_size == 0 else (True, "found")
 
 
 def create_json(response, file):

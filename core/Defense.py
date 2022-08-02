@@ -71,8 +71,7 @@ class Preventive(object):
             "SELECT package FROM patches_db WHERE source = '{0}' and cve_id=? group by package".format(source),
             self.query)
         for package in self.cur.fetchall():
-            package = package[0].strip()
-            if package:
+            if package := package[0].strip():
                 self.cur.execute(
                     "SELECT DISTINCT date_published, description, product,version_fixed, version_not_fixed, "
                     "fix_status FROM "
@@ -114,10 +113,7 @@ class Preventive(object):
 
         for source in self.cur.fetchall():
             source = source[0].strip()
-            data = self.enum_bulletins(source)
-
-            # get only responses with valid data.
-            if data:
+            if data := self.enum_bulletins(source):
                 # format the response
                 tag = {source: data}
                 response.append(tag)
@@ -169,10 +165,7 @@ class Detective(object):
 
         for source in self.cur.fetchall():
             source = source[0].strip()
-            data = self.enum_rules(source)
-
-            # get only responses with valid data. Otherwise the json will be huge (a lot of sources :) )
-            if data:
+            if data := self.enum_rules(source):
                 tag = {source: data}
                 response.append(tag)
 

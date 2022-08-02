@@ -50,9 +50,7 @@ class Search(object):
 
         # query the database
         self.cur.execute("SELECT title,class,link  FROM cwe_db WHERE cwe_id=? ", (self.cwe,))
-        cwe_data = self.cur.fetchone()
-
-        if cwe_data:
+        if cwe_data := self.cur.fetchone():
             # set the CWE data
             title = cwe_data[0]
             cwe_class = cwe_data[1]
@@ -60,14 +58,9 @@ class Search(object):
 
             # query the database
             self.cur.execute("SELECT cve_id from map_cwe_cve where cwe_id=? ORDER BY cve_id DESC", (self.cwe,))
-            data = self.cur.fetchall()
-
-            if data:
+            if data := self.cur.fetchall():
                 # init dict
-                cve = []
-                for cve_id in data:
-                    cve.append(cve_id[0])
-
+                cve = [cve_id[0] for cve_id in data]
                 # set the response
                 response = {"id": self.cwe, "parameters": {"title": title, "class": cwe_class, "url": url},
                             "vulnerability": cve}
@@ -91,14 +84,9 @@ class Search(object):
         # query the database
         self.cur.execute("SELECT cve_id FROM map_cpe_cve WHERE {tn} = ? ORDER BY cve_id DESC".format(tn=col),
                          self.query)
-        data = self.cur.fetchall()
-
-        if data:
+        if data := self.cur.fetchall():
             # init dict
-            cve = []
-            for cve_id in data:
-                cve.append(cve_id[0])
-
+            cve = [cve_id[0] for cve_id in data]
             # set the response
             response = {"id": self.id, "vulnerability": cve}
             return utility.serialize_data(response)

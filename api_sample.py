@@ -34,9 +34,11 @@ print(reference)
 
 reference = json.loads(reference)
 
-for i in range(0, len(reference['references'])):
-    print("The vendor and his url  ({}) = ({})".format(reference['references'][i]['vendor'],
-                                                       reference['references'][i]['url']))
+for i in range(len(reference['references'])):
+    print(
+        f"The vendor and his url  ({reference['references'][i]['vendor']}) = ({reference['references'][i]['url']})"
+    )
+
 
 # loading a vulnerability targets
 from core.Classification import Classification

@@ -40,10 +40,7 @@ class Classification(object):
 
         for vendor in self.cur.fetchall():
             vendor = vendor[0].strip()
-            data = self.enum_packages(vendor)
-
-            # get only responses with valid data.
-            if data:
+            if data := self.enum_packages(vendor):
                 # format the response
                 tag = {vendor: data}
                 response.append(tag)
@@ -89,9 +86,7 @@ class Classification(object):
         for data in self.cur.fetchall():
             cwe_id = data[0]
             self.cur.execute("SELECT title,link,class,relations,capec_id FROM cwe_db WHERE cwe_id='%s' " % cwe_id)
-            cwe_data = self.cur.fetchall()
-
-            if cwe_data:
+            if cwe_data := self.cur.fetchall():
                 title = cwe_data[0][0]
                 url = cwe_data[0][1]
                 cwe_class = cwe_data[0][2]
@@ -164,8 +159,11 @@ class Classification(object):
         response = []
 
         # query the database
-        self.cur.execute("SELECT cwe_id,title,link,relations FROM cwe_db where class = 'category' and relations like ?",
-                         ('%' + cwe_id + '%',))
+        self.cur.execute(
+            "SELECT cwe_id,title,link,relations FROM cwe_db where class = 'category' and relations like ?",
+            (f'%{cwe_id}%',),
+        )
+
 
         for data in self.cur.fetchall():
             # setting category data
@@ -243,8 +241,7 @@ class Classification(object):
         # calling CAPEC data
         for capec_id in capecs:
             self.cur.execute("SELECT attack_mitre_id FROM capec_db WHERE capec_id='%s' " % capec_id)
-            id = self.cur.fetchone()
-            if id:
+            if id := self.cur.fetchone():
                 id = id[0].split('|')
                 [x for x in id if x != '' and attack_list.append(x)]
 
@@ -286,9 +283,7 @@ class Classification(object):
             vendor, self.query[0]))
 
         for product in self.cur.fetchall():
-            product = product[0].strip()
-
-            if product:
+            if product := product[0].strip():
                 self.cur.execute(
                     '''SELECT DISTINCT version_affected, affected_condition FROM packages_db WHERE product="%s" and 
                     cve_id="%s" ''' % (product, self.query[0]))
